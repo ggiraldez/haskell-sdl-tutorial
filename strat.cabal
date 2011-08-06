@@ -1,0 +1,21 @@
+Name:                strat
+Version:             0.0.1
+Stability:           experimental
+Synopsis:            Turn based strategy game using SDL
+Description:         Turn based strategy game using SDL
+License:             GPL-3
+Author:              Gustavo Giráldez
+Maintainer:          gustavo.giraldez@gmail.com
+Build-Type:          Simple
+Cabal-Version:       >=1.4
+Category:            Game
+Homepage:            https://github.com/ggiraldez/haskell-sdl-tutorial
+
+Data-Files:          art/64x74_blue.png, art/64x74_green.png, 
+                     art/64x74_brown.png, art/64x74_white.png
+
+Executable strat
+  Main-is:           Strat.lhs
+  Other-modules:     UIState
+  Build-Depends:     base >= 4, containers, random, SDL, SDL-image
+

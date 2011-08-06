@@ -4,8 +4,8 @@ First, some qualified imports
 > import qualified Data.Map as DMap
 > import qualified System.Random as R
 > import qualified Control.Monad as CM
-> import Graphics.UI.SDL as SDL
-> import Graphics.UI.SDL.Image as SDLi
+> import qualified Graphics.UI.SDL as SDL
+> import qualified Graphics.UI.SDL.Image as SDLi
 
 These are the assets for the terrain
 
@@ -86,7 +86,7 @@ The main thingy
 >     SDL.setVideoMode 640 480 32 []
 >     SDL.setCaption "Video Test!" "video test"
 >
->     mainSurf <- getVideoSurface
+>     mainSurf <- SDL.getVideoSurface
 >     tileSurfs <- loadArt artFilePaths
 >
 >     randomMap <- makeRandomMap 9 8
@@ -101,6 +101,18 @@ The main thingy
 >  where
 >     freeSurf (_, s) = SDL.freeSurface s
 >     eventLoop = SDL.waitEventBlocking >>= checkEvent
->     checkEvent (KeyUp _) = return ()
->     checkEvent _         = eventLoop
+>     checkEvent (SDL.KeyUp _) = return ()
+>     checkEvent (SDL.MouseMotion x y xr yr) = 
+>         putStrLn ("MouseMotion X:" ++ show x ++ "  Y:" ++ show y ++
+>                   "  RX:" ++ show xr ++ "  RY:" ++ show yr)
+>                   >> eventLoop
+>     checkEvent (SDL.MouseButtonDown x y b) = 
+>         putStrLn ("MouseBDown X:" ++ show x ++ "  Y:" ++ show y ++ 
+>                   "  B:" ++ show b)
+>                   >> eventLoop
+>     checkEvent (SDL.MouseButtonUp x y b) = 
+>         putStrLn ("MouseBUp X:" ++ show x ++ "  Y:" ++ show y ++ 
+>                   "  B:" ++ show b)
+>                   >> eventLoop
+>     checkEvent _ = eventLoop
 
