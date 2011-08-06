@@ -39,23 +39,26 @@
 >      tileSurfs <- mapM SDLi.load paths
 >      return $ zip terrainTypes tileSurfs
 
+> mapCoordinates :: [Point]
+> mapCoordinates = [(x,y) | x <- [1..mapColumns], y <- [1..mapRows]]
+
 > redrawScreen ::  UIState -> IO ()
 > redrawScreen ui@(UIState vp _ mainSurf terrainSurfs terrainMap) = do
 >     SDL.fillRect mainSurf Nothing (SDL.Pixel 0)
->     mapM_ (drawTile ui) $ DMap.keys terrainMap
+>     mapM_ (drawTile ui) mapCoordinates
 >     SDL.flip mainSurf
 >     return ()
 
 > drawTile :: UIState -> Point -> IO ()
 > drawTile (UIState vp _ mainSurf terrainSurfs tm) (x,y) = do
->      let sr = Just (SDL.Rect 0 0 tileWidth tileHeight)
->          (tX, tY) = gamePoint2View vp  $ getHexmapOffset tileWidth tileHeight x y
->          dr = Just $ SDL.Rect tX tY 0 0
->          tt = DM.fromJust $ DMap.lookup (x,y) tm
->          terrainSurf = DM.fromJust $ lookup tt terrainSurfs
->      if tileInViewPort vp tileWidth tileHeight (tX,tY)
+>      let sr = {-# SCC "dt-sr" #-} Just (SDL.Rect 0 0 tileWidth tileHeight)
+>          (tX, tY) = {-# SCC "dT-gP2V" #-} gamePoint2View vp $ {-# SCC "dT-gHO" #-} getHexmapOffset tileWidth tileHeight x y
+>          dr = {-# SCC "dT-dr" #-} Just $ SDL.Rect tX tY 0 0
+>          tt = DM.fromJust $ {-# SCC "dT-tmLookup" #-} DMap.lookup (x,y) tm
+>          terrainSurf = DM.fromJust $ {-# SCC "dT-tsLookup" #-} lookup tt terrainSurfs
+>      if {-# SCC "dT-tIVP" #-} tileInViewPort vp tileWidth tileHeight (tX,tY)
 >          then do
->                SDL.blitSurface terrainSurf sr mainSurf dr
+>                {-# SCC "dT-blit" #-} SDL.blitSurface terrainSurf sr mainSurf dr
 >                return ()
 >          else
 >               return ()
@@ -104,6 +107,9 @@
 >   where
 >      freeSurf (_ , s) = SDL.freeSurface s
 >      eventLoop ui = do
+>          e <- SDL.pollEvent
+>          checkEvent ui e
+>      checkEvent ui (SDL.NoEvent) = do
 >          redrawScreen ui
 >          e <- SDL.waitEvent
 >          checkEvent ui e
