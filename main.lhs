@@ -23,34 +23,24 @@ Data types for the definition of the terrain
 > type TerrainSurfaces = [(TerrainType, SDL.Surface)]
 > type TerrainMap = DMap.Map Point TerrainType
 
-How many terrain types do we have?
-
-> terrainMaxBound :: Int
-> terrainMaxBound = fromEnum (maxBound :: TerrainType)
-
-Enumeration of the terrain types, not sure what for yet...
+All the terrain types
 
 > terrainTypes :: [TerrainType]
-> terrainTypes = enumFrom TTh_Blue
+> terrainTypes = [minBound..maxBound]
 
-Generate an array of random terrain types
+Terrain types can be random too...
 
-> getRandomTerrain :: Int -> IO [TerrainType]
-> getRandomTerrain l = do
->     randomNumbers <- CM.replicateM l $ R.randomRIO (0, terrainMaxBound)
->     return $ map toEnum randomNumbers
+> instance R.Random TerrainType where
+>   randomR (a,b) = (onFst toEnum) . (R.randomR (fromEnum a, fromEnum b))
+>     where onFst f (a,b) = (f a,b)
+>   random = R.randomR (minBound, maxBound)
 
 Create a 2D random map
 
 > makeRandomMap :: Int -> Int -> IO TerrainMap
 > makeRandomMap w h = do
->     CM.foldM (\m y -> makeRow w y m) DMap.empty [1..h]
->   where
->     makeRow :: Int -> Int -> TerrainMap -> IO TerrainMap
->     makeRow w y tileMap = do
->         rt <- getRandomTerrain w
->         let tp = zip [1..w] rt
->         return $ foldr (\(x,t) m -> DMap.insert (x,y) t m) tileMap tp
+>     tiles <- CM.replicateM (w*h) R.randomIO
+>     return $ DMap.fromAscList (zip [(x,y) | x <- [1..w], y <- [1..h]] tiles)
 
 Load the assets
 
